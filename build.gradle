@@ -1,0 +1,48 @@
+plugins {
+	id 'java'
+	id "com.diffplug.spotless" version "6.12.0"
+	id 'org.springframework.boot' version '2.7.8'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'com.sics'
+version = '0.0.1-SNAPSHOT'
+
+spotless {
+	java {
+		googleJavaFormat()
+		formatAnnotations()
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenLocal()
+	maven { url 'https://maven.aliyun.com/repository/public/' }
+	maven { url 'https://maven.aliyun.com/repository/spring/'}
+	maven { url 'https://maven.aliyun.com/repository/google/'}
+	maven { url 'https://maven.aliyun.com/repository/gradle-plugin/'}
+	maven { url 'https://maven.aliyun.com/repository/spring-plugin/'}
+	maven { url 'https://maven.aliyun.com/repository/grails-core/'}
+	maven { url 'https://maven.aliyun.com/repository/apache-snapshots/'}
+	mavenCentral()
+}
+
+dependencies {
+//	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

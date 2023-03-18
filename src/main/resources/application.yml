@@ -1,0 +1,32 @@
+parameter:
+  name: "App"
+  corePoolSize: 16
+  maximumPoolSize: 32
+  keepAliveTime: 60
+  blockingQueue: 48
+spring:
+  profiles:
+    active: dev
+  main:
+    banner-mode: off
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+logging:
+  config: classpath:logging-config.xml
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  file:
+    name: logs/${parameter.name}.log
+  logback:
+    rolling policy:
+      max-file-size: 50MB
+      file-name-pattern: logs/%d{yyyy-MM}/info.%d{yyyy-MM-dd}.%i.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [%p] %c{1.1.~.~} - %m%n"
