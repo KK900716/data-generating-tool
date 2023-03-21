@@ -1,10 +1,14 @@
 package com.sics.tool.conf;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,16 +19,16 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BeanFactory {
-  @Value("${parameter.corePoolSize}")
+  @Value("${parameter.pool.corePoolSize}")
   private int corePoolSize;
 
-  @Value("${parameter.maximumPoolSize}")
+  @Value("${parameter.pool.maximumPoolSize}")
   private int maximumPoolSize;
 
-  @Value("${parameter.keepAliveTime}")
+  @Value("${parameter.pool.keepAliveTime}")
   private long keepAliveTime;
 
-  @Value("${parameter.blockingQueue}")
+  @Value("${parameter.pool.blockingQueue}")
   private int blockingQueue;
 
   @Bean
@@ -38,5 +42,16 @@ public class BeanFactory {
         new LinkedBlockingQueue<>(blockingQueue),
         r -> new Thread(r, "User thread " + index.incrementAndGet()),
         new ThreadPoolExecutor.CallerRunsPolicy());
+  }
+
+  @Bean
+  public Random getRandom() {
+    return new Random();
+  }
+
+  @Bean
+  @ConfigurationProperties(prefix = "spring.datasource")
+  public DataSource getDataSource() {
+    return new DruidDataSource();
   }
 }
