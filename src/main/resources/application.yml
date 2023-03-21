@@ -2,8 +2,9 @@ parameter:
   name: "App"
   size:
     transaction: 100
-    parallel: 16
+    parallel: 15
     batch: 4
+    proportion: "5:5:5"
   pool:
     corePoolSize: ${parameter.size.parallel}
     maximumPoolSize: 64
@@ -14,6 +15,13 @@ parameter:
     table: LTEST1
     content: int,string
     length: 0,10
+  update:
+    where: 1
+    whereColumnName: ID0
+    set: 2
+    setColumnName: ID1
+  report:
+    path: "./报告.md"
 spring:
   profiles:
     active: dev
@@ -39,6 +47,7 @@ spring:
 logging:
   level:
     com.sics.tool: info
+    com.sics.tool.task.AbstractTask: debug
     org.springframework: info
   file:
     name: logs/${parameter.name}.log

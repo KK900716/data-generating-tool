@@ -35,12 +35,58 @@ public class TaskConfig {
   @Resource private DataSource dataSource;
   @Resource private ConverterUtils converterUtils;
 
-  public InsertTask newInsertTask() {
+  @Value("#{'${parameter.update.whereColumnName}'.split(',')}")
+  private List<String> whereColumnName;
+
+  @Value("#{'${parameter.update.setColumnName}'.split(',')}")
+  private List<String> setColumnName;
+
+  public AbstractTask newInsertTask() {
+    log();
+    return new InsertTask(
+        schema,
+        table,
+        content,
+        transaction,
+        dataSource,
+        converterUtils,
+        whereColumnName,
+        setColumnName);
+  }
+
+  public AbstractTask newUpdateTask() {
+    log.info("insert task start!");
+    log();
+    return new UpdateTask(
+        schema,
+        table,
+        content,
+        transaction,
+        dataSource,
+        converterUtils,
+        whereColumnName,
+        setColumnName);
+  }
+
+  public AbstractTask newDeleteTask() {
+    log.info("update task start!");
+    log();
+    return new DeleteTask(
+        schema,
+        table,
+        content,
+        transaction,
+        dataSource,
+        converterUtils,
+        whereColumnName,
+        setColumnName);
+  }
+
+  private void log() {
     log.debug("schema:{}.", schema);
     log.debug("table:{}.", table);
     log.debug("content:{}.", content);
     log.debug("length:{}.", length);
     log.debug("transaction:{}.", transaction);
-    return new InsertTask(schema, table, content, length, transaction, dataSource, converterUtils);
   }
 }

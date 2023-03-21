@@ -2,19 +2,12 @@ package com.sics.tool.task;
 
 import com.sics.tool.metadata.ConverterUtils;
 import java.sql.PreparedStatement;
-import java.util.Collections;
 import java.util.List;
 import javax.sql.DataSource;
 
-/**
- * InsertTask
- *
- * @author liangjc
- * @version 2023/03/21
- */
-public class InsertTask extends AbstractTask {
+public class UpdateTask extends AbstractTask {
 
-  public InsertTask(
+  public UpdateTask(
       String schema,
       String table,
       List<String> content,
@@ -36,15 +29,16 @@ public class InsertTask extends AbstractTask {
 
   @Override
   public void innerbind(PreparedStatement stmt) throws Exception {
-    converterUtils.bindInsertData(stmt);
+    converterUtils.bindUpdateData(stmt);
   }
 
   @Override
   public String getSql() {
     return String.format(
-        "INSERT INTO `%s`.`%s` VALUES (%s)",
+        "UPDATE `%s`.`%s` SET %s WHERE %s",
         schema,
         table,
-        getSqlPart(new Placeholder("?", Collections.emptyList()), content.size(), ","));
+        getSqlPart(new Placeholder("= ?", setColumnName), setColumnName.size(), ","),
+        getSqlPart(new Placeholder("= ?", whereColumnName), whereColumnName.size(), " AND "));
   }
 }

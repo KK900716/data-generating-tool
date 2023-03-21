@@ -14,12 +14,12 @@ enum Converter {
   SET_INT(
       (stmt, index, content) -> {
         log.debug("{}", content);
-        stmt.setInt(index + 1, (int) content);
+        stmt.setInt(index, (int) content);
       }),
   SET_STRING(
       (stmt, index, content) -> {
         log.debug("{}", content);
-        stmt.setString(index + 1, (String) content);
+        stmt.setString(index, (String) content);
       });
 
   private Bind bind;
