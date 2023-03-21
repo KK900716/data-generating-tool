@@ -1,14 +1,11 @@
 package com.sics.tool.conf;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -47,11 +44,5 @@ public class BeanFactory {
   @Bean
   public Random getRandom() {
     return new Random();
-  }
-
-  @Bean
-  @ConfigurationProperties(prefix = "spring.datasource")
-  public DataSource getDataSource() {
-    return new DruidDataSource();
   }
 }

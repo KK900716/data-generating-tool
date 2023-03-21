@@ -36,11 +36,11 @@ public class TaskConfig {
   @Resource private ConverterUtils converterUtils;
 
   public InsertTask newInsertTask() {
-    log.info("schema:{}.", schema);
-    log.info("table:{}.", table);
-    log.info("content:{}.", content);
-    log.info("length:{}.", length);
-    log.info("transaction:{}.", transaction);
+    log.debug("schema:{}.", schema);
+    log.debug("table:{}.", table);
+    log.debug("content:{}.", content);
+    log.debug("length:{}.", length);
+    log.debug("transaction:{}.", transaction);
     return new InsertTask(schema, table, content, length, transaction, dataSource, converterUtils);
   }
 }

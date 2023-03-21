@@ -4,9 +4,9 @@ import com.sics.tool.metadata.ConverterUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.concurrent.Callable;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @AllArgsConstructor
-public class InsertTask implements Runnable {
+public class InsertTask implements Callable<Long> {
   private static final String SQL = "INSERT INTO `%s`.`%s` VALUES (%s)";
   private static final int BATCH = 100;
   private String schema;
@@ -27,22 +27,6 @@ public class InsertTask implements Runnable {
   private int transaction;
   private DataSource dataSource;
   private ConverterUtils converterUtils;
-
-  @SneakyThrows
-  @Override
-  public void run() {
-    String sql = String.format(SQL, schema, table, getPlaceholder());
-    log.info("sql is {}.", sql);
-    Connection conn = dataSource.getConnection();
-    PreparedStatement stmt = conn.prepareStatement(sql);
-    log.info("start execute.");
-    int batch = transaction / BATCH;
-    for (int i = 0; i < batch; i++) {
-      addBatch(stmt, BATCH);
-    }
-    int last = transaction % BATCH;
-    addBatch(stmt, last);
-  }
 
   private void addBatch(PreparedStatement stmt, int batch) throws Exception {
     for (int j = 0; j < batch; j++) {
@@ -60,5 +44,22 @@ public class InsertTask implements Runnable {
     }
     pl.append("?");
     return pl.toString();
+  }
+
+  @Override
+  public Long call() throws Exception {
+    String sql = String.format(SQL, schema, table, getPlaceholder());
+    long start = System.currentTimeMillis();
+    log.info("sql is {}.", sql);
+    Connection conn = dataSource.getConnection();
+    PreparedStatement stmt = conn.prepareStatement(sql);
+    log.info("start execute.");
+    int batch = transaction / BATCH;
+    for (int i = 0; i < batch; i++) {
+      addBatch(stmt, BATCH);
+    }
+    int last = transaction % BATCH;
+    addBatch(stmt, last);
+    return System.currentTimeMillis() - start;
   }
 }

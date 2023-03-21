@@ -1,13 +1,14 @@
 parameter:
   name: "App"
-  pool:
-    corePoolSize: 3
-    maximumPoolSize: 6
-    keepAliveTime: 60
-    blockingQueue: 12
   size:
-    transaction: 10000
-    batch: 2
+    transaction: 100
+    parallel: 16
+    batch: 4
+  pool:
+    corePoolSize: ${parameter.size.parallel}
+    maximumPoolSize: 64
+    keepAliveTime: 60
+    blockingQueue: 64
   structure:
     schema: test
     table: LTEST1
@@ -23,33 +24,6 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-    druid:
-      #     配置初始化大小、最小、最大线程数
-      initialSize: 8
-      minIdle: 4
-      #     CPU核数+1，也可以大些但不要超过20，数据库加锁时连接过多性能下降
-      maxActive: 16
-      #     最大等待时间，内网：800，外网：1200（三次握手1s）
-      maxWait: 60000
-      timeBetweenEvictionRunsMillis: 60000
-      #     配置一个连接在池中最大空间时间，单位是毫秒
-      minEvictableIdleTimeMillis: 300000
-      validationQuery: SELECT 1
-      testWhileIdle: true
-      #     设置从连接池获取连接时是否检查连接有效性，true检查，false不检查
-      testOnBorrow: true
-      #     设置从连接池归还连接时是否检查连接有效性，true检查，false不检查
-      testOnReturn: true
-      #     可以支持PSCache（提升写入、查询效率）
-      poolPreparedStatements: true
-      #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
-      filters: stat,wall,log4j
-      #     保持长连接
-      keepAlive: true
-      maxPoolPreparedStatementPerConnectionSize: 20
-      useGlobalDataSourceStat: true
-      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
 ---
 spring:
   config:
@@ -64,7 +38,7 @@ spring:
       on-profile: dev
 logging:
   level:
-    com.sics.tool: debug
+    com.sics.tool: info
     org.springframework: info
   file:
     name: logs/${parameter.name}.log
