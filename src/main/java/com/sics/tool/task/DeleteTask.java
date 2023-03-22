@@ -38,6 +38,6 @@ public class DeleteTask extends AbstractTask {
         "DELETE FROM `%s`.`%s` WHERE %s",
         schema,
         table,
-        getSqlPart(new Placeholder("= ?", whereColumnName), whereColumnName.size(), ","));
+        getSqlPart(new Placeholder("= ?", whereColumnName), whereColumnName.size(), " AND "));
   }
 }

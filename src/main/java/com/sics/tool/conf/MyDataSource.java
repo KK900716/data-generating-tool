@@ -36,7 +36,7 @@ public class MyDataSource implements DataSource {
     info.setProperty(PropertyKey.useSSL.getKeyName(), Boolean.toString(false));
     Connection conn = DriverManager.getConnection(url, info);
     conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-    conn.setAutoCommit(false);
+    conn.setAutoCommit(true);
     return conn;
   }
 
