@@ -94,6 +94,7 @@ public class ConverterUtils {
     synchronized (this) {
       obj = atomicInteger.getAndIncrement();
     }
+//    obj = random.nextInt();
     if (b) {
       list.add(obj);
     }
@@ -131,7 +132,7 @@ public class ConverterUtils {
     List<Object> list;
     lock.lock();
     try {
-      int i = (int) (Math.random() * update.size());
+      int i = (int) (Math.random() * delete.size());
       list = delete.get(i);
       delete.remove(i);
     } finally {

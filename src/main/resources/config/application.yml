@@ -1,8 +1,8 @@
 parameter:
   size:
-    transaction: 200
+    transaction: 2000
     parallel: 15
-    batch: 4
+    batch: 30
     proportion: "5:5:5"
   structure:
     schema: test

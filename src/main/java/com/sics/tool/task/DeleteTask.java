@@ -35,7 +35,7 @@ public class DeleteTask extends AbstractTask {
   @Override
   public String getSql() {
     return String.format(
-        "DELETE `%s`.`%s` WHERE %s",
+        "DELETE FROM `%s`.`%s` WHERE %s",
         schema,
         table,
         getSqlPart(new Placeholder("= ?", whereColumnName), whereColumnName.size(), ","));

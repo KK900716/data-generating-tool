@@ -1,10 +1,12 @@
 package com.sics.tool.conf;
 
+import com.mysql.cj.conf.PropertyKey;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import lombok.Data;
@@ -26,7 +28,16 @@ public class MyDataSource implements DataSource {
 
   @Override
   public Connection getConnection() throws SQLException {
-    return DriverManager.getConnection(url, username, password);
+    Properties info = new Properties();
+    info.setProperty(PropertyKey.USER.getKeyName(), username);
+    info.setProperty(PropertyKey.PASSWORD.getKeyName(), password);
+    info.setProperty(PropertyKey.useServerPrepStmts.getKeyName(), Boolean.toString(true));
+    info.setProperty(PropertyKey.databaseTerm.getKeyName(), "SCHEMA");
+    info.setProperty(PropertyKey.useSSL.getKeyName(), Boolean.toString(false));
+    Connection conn = DriverManager.getConnection(url, info);
+    conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+    conn.setAutoCommit(false);
+    return conn;
   }
 
   @Override

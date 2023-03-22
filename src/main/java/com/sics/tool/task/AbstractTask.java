@@ -39,6 +39,7 @@ public abstract class AbstractTask implements Callable<Long> {
     }
     int last = transaction % this.batchBind;
     addBatch(stmt, last);
+    conn.commit();
     conn.close();
     return System.currentTimeMillis() - start;
   }
