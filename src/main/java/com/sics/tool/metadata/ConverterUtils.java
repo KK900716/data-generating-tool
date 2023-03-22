@@ -1,8 +1,11 @@
 package com.sics.tool.metadata;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +39,11 @@ public class ConverterUtils {
   @Value("#{'${parameter.update.set}'.split(',')}")
   private List<Integer> set;
 
+  @Value("#{'${parameter.structure.rule}'.split(',')}")
+  private List<String> originRule;
+
+  private Map<Integer, String[]> rule;
+
   private AtomicInteger atomicInteger = new AtomicInteger(0);
 
   private final CopyOnWriteArrayList<List<Object>> update = new CopyOnWriteArrayList<>();
@@ -44,16 +52,21 @@ public class ConverterUtils {
   private final ReentrantLock lock = new ReentrantLock();
 
   private void bind(
-      PreparedStatement stmt, int i, boolean b, List<Object> list, Operation operation)
+      PreparedStatement stmt,
+      int seat,
+      boolean b,
+      List<Object> list,
+      Operation operation,
+      Integer index)
       throws Exception {
-    switch (content.get(i - 1)) {
+    switch (content.get(seat - 1)) {
       case "int":
         switch (operation) {
           case INSERT:
-            Converter.SET_INT.executeBind(stmt, i, getInsertIntObj(b, list));
+            Converter.SET_INT.executeBind(stmt, index, getInsertIntObj(b, list));
             break;
           case UPDATE:
-            Converter.SET_INT.executeBind(stmt, i, getUpdateObj(i, list));
+            Converter.SET_INT.executeBind(stmt, index, getUpdateObj(seat, list));
             break;
           default:
             throw new RuntimeException(operation + " is not support!");
@@ -62,10 +75,10 @@ public class ConverterUtils {
       case "string":
         switch (operation) {
           case INSERT:
-            Converter.SET_STRING.executeBind(stmt, i, getInsertStringObj(i, b, list));
+            Converter.SET_STRING.executeBind(stmt, index, getInsertStringObj(seat, b, list));
             break;
           case UPDATE:
-            Converter.SET_INT.executeBind(stmt, i, getUpdateObj(i, list));
+            Converter.SET_STRING.executeBind(stmt, index, getUpdateObj(seat, list));
             break;
           default:
             throw new RuntimeException(operation + " is not support!");
@@ -74,22 +87,22 @@ public class ConverterUtils {
       case "number":
         switch (operation) {
           case INSERT:
-            Converter.SET_STRING.executeBind(stmt, i, getInsertNumberObj(b, list));
+            Converter.SET_NUMBER.executeBind(stmt, index, getInsertNumberObj(b, list));
             break;
           case UPDATE:
-            Converter.SET_INT.executeBind(stmt, i, getUpdateObj(i, list));
+            Converter.SET_NUMBER.executeBind(stmt, index, getUpdateObj(seat, list));
             break;
           default:
             throw new RuntimeException(operation + " is not support!");
         }
         break;
       default:
-        throw new RuntimeException(content.get(i - 1) + " is not support!");
+        throw new RuntimeException(content.get(seat - 1) + " is not support!");
     }
   }
 
   private Object getInsertNumberObj(boolean b, List<Object> list) {
-    Object obj = String.valueOf(random.nextDouble());
+    Object obj = BigDecimal.valueOf(random.nextDouble() * 100);
     if (b) {
       list.add(obj);
     }
@@ -97,12 +110,17 @@ public class ConverterUtils {
   }
 
   private Object getUpdateObj(int i, List<Object> list) {
-    return list.get(i - 1);
+    return list.get(where.indexOf(i));
   }
 
   private Object getInsertStringObj(int i, boolean b, List<Object> list) {
     Object obj;
-    obj = RandomStringUtils.randomAlphabetic(length.get(i - 1));
+    String[] strings = rule.get(i);
+    if (strings == null) {
+      obj = RandomStringUtils.randomAlphabetic(length.get(i - 1));
+    } else {
+      obj = strings[(int) (Math.random() * strings.length)];
+    }
     if (b) {
       list.add(obj);
     }
@@ -114,7 +132,7 @@ public class ConverterUtils {
     synchronized (this) {
       obj = atomicInteger.getAndIncrement();
     }
-//    obj = random.nextInt();
+    //    obj = random.nextInt();
     if (b) {
       list.add(obj);
     }
@@ -122,9 +140,16 @@ public class ConverterUtils {
   }
 
   public void bindInsertData(PreparedStatement stmt) throws Exception {
+    if (rule == null) {
+      rule = new HashMap<>(originRule.size());
+      for (String s : originRule) {
+        String[] split = s.split(":");
+        rule.put(Integer.valueOf(split[0]), split[1].split("、"));
+      }
+    }
     List<Object> list = new ArrayList<>();
     for (int i = 1; i <= content.size(); i++) {
-      bind(stmt, i, where.contains(i), list, Operation.INSERT);
+      bind(stmt, i, where.contains(i), list, Operation.INSERT, i);
     }
     update.add(list);
   }
@@ -140,11 +165,12 @@ public class ConverterUtils {
     } finally {
       lock.unlock();
     }
-    for (Integer integer : set) {
-      bind(stmt, integer, false, null, Operation.INSERT);
+    int t = 1;
+    for (Integer i : set) {
+      bind(stmt, i, false, null, Operation.INSERT, t++);
     }
-    for (Integer integer : where) {
-      bind(stmt, integer, true, list, Operation.UPDATE);
+    for (Integer i : where) {
+      bind(stmt, i, true, list, Operation.UPDATE, t++);
     }
   }
 
@@ -158,8 +184,9 @@ public class ConverterUtils {
     } finally {
       lock.unlock();
     }
-    for (Integer integer : where) {
-      bind(stmt, integer, true, list, Operation.UPDATE);
+    int t = 1;
+    for (Integer i : where) {
+      bind(stmt, i, true, list, Operation.UPDATE, t++);
     }
   }
 }

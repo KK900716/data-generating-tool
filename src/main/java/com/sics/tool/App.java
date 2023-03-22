@@ -48,6 +48,8 @@ public class App {
     }
     reportUtil.store();
     log.info("wait finish!");
+    pool.shutdown();
+    System.exit(0);
   }
 
   private void analyse(List<Future<Long>> execute, int batch)

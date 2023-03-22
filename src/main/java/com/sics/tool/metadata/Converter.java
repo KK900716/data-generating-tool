@@ -12,14 +12,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 enum Converter {
-  SET_INT(
-      (stmt, index, content) -> stmt.setInt(index, (int) content)),
-  SET_STRING(
-      (stmt, index, content) -> stmt.setString(index, (String) content)),
-  SET_NUMBER(
-      (stmt, index, content) -> {
-    stmt.setBigDecimal(index, (BigDecimal) content);
-  });
+  SET_INT((stmt, index, content) -> stmt.setInt(index, (int) content)),
+  SET_STRING((stmt, index, content) -> stmt.setString(index, (String) content)),
+  SET_NUMBER((stmt, index, content) -> stmt.setBigDecimal(index, (BigDecimal) content));
 
   private Bind bind;
 
