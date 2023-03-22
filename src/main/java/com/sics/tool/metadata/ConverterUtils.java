@@ -71,9 +71,29 @@ public class ConverterUtils {
             throw new RuntimeException(operation + " is not support!");
         }
         break;
+      case "number":
+        switch (operation) {
+          case INSERT:
+            Converter.SET_STRING.executeBind(stmt, i, getInsertNumberObj(b, list));
+            break;
+          case UPDATE:
+            Converter.SET_INT.executeBind(stmt, i, getUpdateObj(i, list));
+            break;
+          default:
+            throw new RuntimeException(operation + " is not support!");
+        }
+        break;
       default:
         throw new RuntimeException(content.get(i - 1) + " is not support!");
     }
+  }
+
+  private Object getInsertNumberObj(boolean b, List<Object> list) {
+    Object obj = String.valueOf(random.nextDouble());
+    if (b) {
+      list.add(obj);
+    }
+    return obj;
   }
 
   private Object getUpdateObj(int i, List<Object> list) {

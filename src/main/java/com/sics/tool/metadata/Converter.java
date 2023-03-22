@@ -1,5 +1,6 @@
 package com.sics.tool.metadata;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,15 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 enum Converter {
   SET_INT(
-      (stmt, index, content) -> {
-        log.debug("{}", content);
-        stmt.setInt(index, (int) content);
-      }),
+      (stmt, index, content) -> stmt.setInt(index, (int) content)),
   SET_STRING(
+      (stmt, index, content) -> stmt.setString(index, (String) content)),
+  SET_NUMBER(
       (stmt, index, content) -> {
-        log.debug("{}", content);
-        stmt.setString(index, (String) content);
-      });
+    stmt.setBigDecimal(index, (BigDecimal) content);
+  });
 
   private Bind bind;
 

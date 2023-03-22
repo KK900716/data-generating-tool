@@ -22,7 +22,7 @@ public class ReportUtil {
     try (FileWriter fw = new FileWriter(path)) {
       fw.write("## 报告\n");
       fw.write("|插入批次 batch|指标 行/s|\n");
-      fw.write("|:--:|:--:|\n");
+      fw.write("|:----:|:----:|\n");
       for (Report it : reports) {
         fw.write("|" + it.getBatch() + "|" + it.getMetric() + "|\n");
       }
