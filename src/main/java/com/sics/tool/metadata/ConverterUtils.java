@@ -1,5 +1,6 @@
 package com.sics.tool.metadata;
 
+import java.lang.ref.SoftReference;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +48,14 @@ public class ConverterUtils {
 
   private AtomicInteger atomicInteger = new AtomicInteger(0);
 
-  private final CopyOnWriteArrayList<List<Object>> update = new CopyOnWriteArrayList<>();
-  private final CopyOnWriteArrayList<List<Object>> delete = new CopyOnWriteArrayList<>();
+  private final CopyOnWriteArrayList<SoftReference<List<Object>>> update =
+      new CopyOnWriteArrayList<>();
+  private final CopyOnWriteArrayList<SoftReference<List<Object>>> delete =
+      new CopyOnWriteArrayList<>();
 
   private final ReentrantLock lock = new ReentrantLock();
+
+  private AtomicLong serial = new AtomicLong(Long.MIN_VALUE);
 
   private void bind(
       PreparedStatement stmt,
@@ -119,7 +125,13 @@ public class ConverterUtils {
     if (strings == null) {
       obj = RandomStringUtils.randomAlphabetic(length.get(i - 1));
     } else {
-      obj = strings[(int) (Math.random() * strings.length)];
+      switch (strings[0]) {
+        case "$serial":
+          obj = String.valueOf(serial.incrementAndGet());
+          break;
+        default:
+          obj = strings[(int) (Math.random() * strings.length)];
+      }
     }
     if (b) {
       list.add(obj);
@@ -151,7 +163,7 @@ public class ConverterUtils {
     for (int i = 1; i <= content.size(); i++) {
       bind(stmt, i, where.contains(i), list, Operation.INSERT, i);
     }
-    update.add(list);
+    update.add(new SoftReference<>(list));
   }
 
   public void bindUpdateData(PreparedStatement stmt) throws Exception {
@@ -159,9 +171,13 @@ public class ConverterUtils {
     lock.lock();
     try {
       int i = (int) (Math.random() * update.size());
-      list = update.get(i);
+      while (update.get(i).get() == null) {
+        update.remove(i);
+        i = (int) (Math.random() * update.size());
+      }
+      list = update.get(i).get();
       update.remove(i);
-      delete.add(list);
+      delete.add(new SoftReference<>(list));
     } finally {
       lock.unlock();
     }
@@ -179,7 +195,11 @@ public class ConverterUtils {
     lock.lock();
     try {
       int i = (int) (Math.random() * delete.size());
-      list = delete.get(i);
+      while (delete.get(i).get() == null) {
+        delete.remove(i);
+        i = (int) (Math.random() * delete.size());
+      }
+      list = delete.get(i).get();
       delete.remove(i);
     } finally {
       lock.unlock();
