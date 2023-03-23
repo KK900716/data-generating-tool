@@ -46,8 +46,6 @@ public class ConverterUtils {
 
   private Map<Integer, String[]> rule;
 
-  private AtomicInteger atomicInteger = new AtomicInteger(0);
-
   private final CopyOnWriteArrayList<SoftReference<List<Object>>> update =
       new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<SoftReference<List<Object>>> delete =
@@ -55,7 +53,9 @@ public class ConverterUtils {
 
   private final ReentrantLock lock = new ReentrantLock();
 
-  private AtomicLong serial = new AtomicLong(Long.MIN_VALUE);
+  private final AtomicInteger atomicInteger = new AtomicInteger(0);
+
+  private final AtomicLong serial = new AtomicLong(Long.MIN_VALUE);
 
   private void bind(
       PreparedStatement stmt,
