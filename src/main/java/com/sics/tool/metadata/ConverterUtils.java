@@ -170,13 +170,7 @@ public class ConverterUtils {
     List<Object> list;
     lock.lock();
     try {
-      int i = (int) (Math.random() * update.size());
-      while (update.get(i).get() == null) {
-        update.remove(i);
-        i = (int) (Math.random() * update.size());
-      }
-      list = update.get(i).get();
-      update.remove(i);
+      list = getObjects(update);
       delete.add(new SoftReference<>(list));
     } finally {
       lock.unlock();
@@ -190,17 +184,23 @@ public class ConverterUtils {
     }
   }
 
+  private List<Object> getObjects(CopyOnWriteArrayList<SoftReference<List<Object>>> update) {
+    List<Object> list;
+    int i = (int) (Math.random() * update.size());
+    while (update.get(i).get() == null) {
+      update.remove(i);
+      i = (int) (Math.random() * update.size());
+    }
+    list = update.get(i).get();
+    update.remove(i);
+    return list;
+  }
+
   public void bindDeleteData(PreparedStatement stmt) throws Exception {
     List<Object> list;
     lock.lock();
     try {
-      int i = (int) (Math.random() * delete.size());
-      while (delete.get(i).get() == null) {
-        delete.remove(i);
-        i = (int) (Math.random() * delete.size());
-      }
-      list = delete.get(i).get();
-      delete.remove(i);
+      list = getObjects(delete);
     } finally {
       lock.unlock();
     }
