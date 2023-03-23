@@ -3,6 +3,7 @@ parameter:
     transaction: 2000
     parallel: 15
     batch: 30
+    # 如果time设置为0 则根据batch运行，否则根据time运行
     time: 1
     proportion: "5:5:5"
   structure:
