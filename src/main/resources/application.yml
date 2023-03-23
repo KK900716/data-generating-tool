@@ -4,6 +4,7 @@ parameter:
     transaction: 100
     parallel: 15
     batch: 4
+    time: 60
     proportion: "5:5:5"
   pool:
     corePoolSize: ${parameter.size.parallel}
