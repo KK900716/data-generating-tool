@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -116,26 +115,27 @@ public class App {
     log.info("程序计划运行 {} min.", time);
     if (time != 0) {
       batch = Integer.MAX_VALUE;
-      pool.execute(() -> {
-        long start = System.currentTimeMillis();
-        double now = 0;
-        while (now < time) {
-          now = (System.currentTimeMillis() - start) * 1.0 / 1000 / 60;
-          log.info("程序已经运行 {} min.", String.format("%.2f", now));
-          try {
-            TimeUnit.SECONDS.sleep(10);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
+      pool.execute(
+          () -> {
+            long start = System.currentTimeMillis();
+            double now = 0;
+            while (now < time) {
+              now = (System.currentTimeMillis() - start) * 1.0 / 1000 / 60;
+              log.info("程序已经运行 {} min.", String.format("%.2f", now));
+              try {
+                TimeUnit.SECONDS.sleep(10);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.info("finish!");
+                pool.shutdown();
+                System.exit(0);
+              }
+            }
+            log.info("程序运行时间耗尽，程序结束！");
             log.info("finish!");
             pool.shutdown();
             System.exit(0);
-          }
-        }
-        log.info("程序运行时间耗尽，程序结束！");
-        log.info("finish!");
-        pool.shutdown();
-        System.exit(0);
-      });
+          });
     }
     pool.execute(
         () -> {
